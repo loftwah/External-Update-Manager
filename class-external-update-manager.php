@@ -40,11 +40,11 @@ if ( ! class_exists( 'EUM_Handler' ) ) {
 			return end( self::$versions );
 		}
 
-		public static function run( $path, $url ) {
+		public static function run( $path, $url, $token = null ) {
 			$latest = str_replace( '.', '_', self::get_latest() );
 			$class  = 'External_Update_Manager_' . $latest;
 
-			return new $class( $path, $url );
+			return new $class( $path, $url, $token );
 		}
 
 	}
@@ -64,6 +64,7 @@ if ( ! class_exists( 'External_Update_Manager_1_9_2' ) ) {
 
 		private $update_url;
 		private $update_data;
+		private $access_token;
 		private $item_type;
 		private $item_slug;
 		private $item_key;
@@ -72,8 +73,9 @@ if ( ! class_exists( 'External_Update_Manager_1_9_2' ) ) {
 		private $transient    = 'eum_';
 		private $has_update   = false;
 
-		public function __construct( $full_path, $update_url ) {
-			$this->update_url = $update_url;
+		public function __construct( $full_path, $update_url, $access_token = null ) {
+			$this->update_url   = $update_url;
+			$this->access_token = $access_token;
 			$this->get_file_details( $full_path );
 			$this->transient .= $this->item_type . '_' . $this->item_slug;
 
@@ -191,8 +193,9 @@ if ( ! class_exists( 'External_Update_Manager_1_9_2' ) ) {
 
 			if ( ! is_object( $data ) ) {
 				$args = array(
-					'type' => $this->item_type,
-					'slug' => $this->item_slug,
+					'type'  => $this->item_type,
+					'slug'  => $this->item_slug,
+					'token' => $this->access_token,
 				);
 				$data = $this->call_remote_api( $args );
 				set_site_transient( $this->transient, $data, HOUR_IN_SECONDS );
